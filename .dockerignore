@@ -1,0 +1,44 @@
+# Version control
+.git
+.gitignore
+
+# Dependencies (reinstalled in image)
+**/node_modules
+
+# Build outputs
+**/dist
+**/.next
+**/build
+**/*.tsbuildinfo
+
+# Expo
+**/.expo
+**/ios
+**/android
+**/web-build
+
+# Environment & secrets — never bake into images
+**/.env
+**/.env.local
+**/.env.*.local
+!**/.env.example
+
+# Logs
+**/logs
+**/*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Tests
+**/tests
+**/coverage
+
+# IDE & OS
+.vscode
+.idea
+.DS_Store
+*.swp
+
+# Docs
+docs
+*.md
