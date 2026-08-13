@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "LinkPoint",
+    "slug": "linkpoint",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "scheme": "linkpoint",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0D77F8"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.linkpoint.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "LinkPoint uses your location to show nearby properties and match inspection agents."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0D77F8"
+      },
+      "package": "com.linkpoint.app"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": false
+    },
+    "extra": {
+      "linkpointApiUrl": "http://localhost:8080/api",
+      "eas": {
+        "projectId": "linkpoint"
+      }
+    }
+  }
+}

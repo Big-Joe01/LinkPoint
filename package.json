@@ -1,0 +1,37 @@
+{
+  "name": "linkpoint",
+  "version": "0.1.0",
+  "private": true,
+  "description": "LinkPoint — production-ready mobile real-estate marketplace, fintech wallet, inspection network, advertising, affiliate and transaction platform.",
+  "license": "UNLICENSED",
+  "packageManager": "npm@10.9.8",
+  "workspaces": [
+    "apps/mobile",
+    "apps/admin",
+    "backend",
+    "packages/types",
+    "packages/validation",
+    "packages/config",
+    "packages/shared"
+  ],
+  "scripts": {
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "db:up": "docker compose up -d mysql redis",
+    "db:down": "docker compose down",
+    "db:migrate": "npm --workspace backend run db:migrate",
+    "db:generate": "npm --workspace backend run db:generate",
+    "backend:dev": "npm --workspace backend run dev",
+    "backend:test": "npm --workspace backend run test",
+    "backend:start": "npm --workspace backend run start",
+    "mobile:start": "npm --workspace apps/mobile run start"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
