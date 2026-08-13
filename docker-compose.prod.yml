@@ -1,0 +1,95 @@
+# =============================================================================
+# LinkPoint — full-stack production deployment.
+# Brings up the backend API, admin dashboard, MySQL, and Redis together.
+#
+# Usage:
+#   cp .env.example .env.prod   # then edit with real secrets
+#   docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
+#   docker compose -f docker-compose.prod.yml exec backend npx prisma migrate deploy --schema prisma/schema.prisma
+# =============================================================================
+
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-linkpoint}
+      MYSQL_USER: ${MYSQL_USER:-linkpoint}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+      API_PREFIX: /api
+      APP_URL: ${APP_URL}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-15m}
+      JWT_REFRESH_TTL: ${JWT_REFRESH_TTL:-7d}
+      BCRYPT_ROUNDS: ${BCRYPT_ROUNDS:-12}
+      FLUTTERWAVE_PUBLIC_KEY: ${FLUTTERWAVE_PUBLIC_KEY}
+      FLUTTERWAVE_SECRET_KEY: ${FLUTTERWAVE_SECRET_KEY}
+      FLUTTERWAVE_ENCRYPTION_KEY: ${FLUTTERWAVE_ENCRYPTION_KEY}
+      FLUTTERWAVE_WEBHOOK_HASH: ${FLUTTERWAVE_WEBHOOK_HASH}
+      FLUTTERWAVE_API_BASE: ${FLUTTERWAVE_API_BASE:-https://api.flutterwave.com/v3}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      MAPS_API_KEY: ${MAPS_API_KEY}
+      DEEP_LINK_SCHEME: ${DEEP_LINK_SCHEME:-linkpoint}
+      WALLET_WEBHOOK_IDEMPOTENCY_TTL_SECONDS: ${WALLET_WEBHOOK_IDEMPOTENCY_TTL_SECONDS:-86400}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080/api}
+    ports:
+      - "${ADMIN_PORT:-3000}:3000"
+
+volumes:
+  mysql_data:
+  redis_data:
